@@ -1,0 +1,157 @@
+﻿#include <iostream>
+#include <cstdlib>
+#define SIZE 5
+using namespace std;
+
+class Dequeue {
+
+    int start = -1;
+    int end = -1;
+    int size = SIZE;
+    int* buffer = new int[size];
+
+    bool IsFull() const {
+        return  (end + 1) % size == start;
+    }
+    bool OneElement() const {
+        return (start == end && start != -1);
+    }
+
+public:
+    Dequeue() = default;
+    ~Dequeue() {
+        delete[] buffer;
+    }
+    Dequeue(const Dequeue& Deque) {
+        start = Deque.start;
+        end = Deque.end;
+        for (int i = Deque.start; i <= Deque.end; i = (i + 1) % size) {
+            buffer[i] = Deque.buffer[i];
+            buffer[end] = Deque.buffer[end];
+        }
+     }
+    Dequeue& operator = (const Dequeue& Deque) {
+        int* new_buffer = new int[Deque.size];
+        start = Deque.start;
+        end = Deque.end;
+        size = Deque.size;
+        for (int i = start; i != end; i = (i + 1) % size) {
+            new_buffer[i] = Deque.buffer[i];
+        }
+        new_buffer[end] = Deque.buffer[end];
+        delete[] buffer;
+        buffer = new_buffer;
+        return *this;
+    }
+
+    bool IsEmpty() const {
+        return (start == end && start == -1);
+    }
+    int get_count() const {
+        return (end >= start) ? (end - start + 1) : size - (start - end - 1);
+    }
+    int get_front() const {
+        if (IsEmpty()) exit(1);
+        return buffer[start];
+    }
+    int get_back() const {
+        if (IsEmpty()) exit(1);
+        return buffer[end];
+    }
+
+    void print()const {
+        if (IsEmpty()) return;
+        int i = start;
+        while (i != end) {
+            cout << buffer[i] << " -> ";
+            i = (i + 1) % size;
+        }
+        cout << buffer[i] << endl;
+    }
+
+    bool pop_front() {
+        if (IsEmpty()) return false;
+        if (OneElement()) start = end = -1;
+        else start = (start + 1) % size;
+        return true;
+    }
+
+    bool pop_back() {
+        if (IsEmpty()) return false;
+        if (OneElement()) start = end = -1;
+        else end = (end - 1 + size) % size;
+        return true;
+    }
+    bool push_front(int element) {
+        if (IsEmpty())  start = end = 0;
+        else
+        {
+            if (IsFull())
+            {
+                int* new_buffer = new int[size * 2];
+                int j = start, i = 0;
+                while (j != end) {
+                    new_buffer[i] = buffer[j];
+                    i++;
+                    j = (j + 1) % size;
+                }
+                new_buffer[i] = buffer[j];
+                delete[] buffer;
+                buffer = new_buffer;
+                start = 0;
+                end = i;
+                size *= 2;
+            }
+            start = (start - 1 + size) % size;
+        }
+        buffer[start] = element;
+        return true;
+    }
+    bool push_back(int element) {
+        if (IsEmpty())  start = end = 0;
+        else
+        {
+            if (IsFull())
+            {
+                int* new_buffer = new int[size * 2];
+                int j = start, i = 0;
+                while (j != end) {
+                    new_buffer[i] = buffer[j];
+                    i++;
+                    j = (j + 1) % size;
+                }
+                new_buffer[i] = buffer[j];
+                delete[] buffer;
+                buffer = new_buffer;
+                start = 0;
+                end = i;
+                size *= 2;
+            }
+            end = (end + 1) % size;
+        }
+        buffer[end] = element;
+        return true;
+    }
+
+};
+int main()
+{
+    Dequeue q1;
+    Dequeue q2(q1);
+    q1.push_front(1);
+    q1.push_back(2);
+    q1.push_front(3);
+    q1.push_back(4);
+    q1.print(); // 3 1 2 4
+    q1.push_front(5);
+    q1.print(); // 5 -> 3 -> 1 -> 2 -> 4
+    q1.push_back(10);
+    q1.push_back(11);
+    q1.print(); // 5 -> 3 -> 1 -> 2 -> 4 -> 10 -> 11
+    q1.pop_back();
+    q1.pop_front();
+    q1.print(); // 3 -> 1 -> 2 -> 4 -> 10
+    //q2 = q1;
+    q2.print();
+    return 0;
+}
